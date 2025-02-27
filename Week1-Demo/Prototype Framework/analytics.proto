@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package analytics;
+
+service AnalyticsService { rpc Compute (AnalyticsRequest) returns (AnalyticsResponse); }
+
+message AnalyticsRequest { repeated double data = 1; }
+
+message AnalyticsResponse { double mean = 1; double max = 2; double min = 3; double sum = 4; }
+

@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+  it_microservice:
+    build: .
+    ports:
+      - "50051:50051"
+      - "8010:8010"
+
+  ot_microservice:
+    build: .
+    depends_on:
+      - it_microservice
+
+  mqtt_subscriber:
+    build: .
+    depends_on:
+      - it_microservice
+      - ot_microservice
+
+  mqtt_broker:
+    image: eclipse-mosquitto
+    ports:
+      - "1883:1883"
