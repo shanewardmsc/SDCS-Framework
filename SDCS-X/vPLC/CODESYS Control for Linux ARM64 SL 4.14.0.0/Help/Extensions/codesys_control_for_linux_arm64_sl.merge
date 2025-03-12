@@ -1,0 +1,7 @@
+<Merge>
+	<File>codesys_control_for_linux_arm64_sl.chm</File>
+	<TOCRoot>codesys.chm::/meta.htm</TOCRoot>
+	<TOCTree>
+		<Path>Add-ons</Path>
+	</TOCTree>
+</Merge>

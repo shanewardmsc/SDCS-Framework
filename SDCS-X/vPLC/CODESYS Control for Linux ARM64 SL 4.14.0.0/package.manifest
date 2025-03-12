@@ -1,0 +1,180 @@
+<?xml version='1.0' encoding='utf-8'?>
+<Package>
+	<Strings>
+		<String Id="GeneralName">
+			<Neutral>CODESYS Control for Linux ARM64 SL</Neutral>
+			<Localized Culture="de">CODESYS Control for Linux ARM64 SL</Localized>
+		</String>
+		<String Id="GeneralCopyright">
+			<Neutral>Copyright (c) 2017 CODESYS Development GmbH</Neutral>
+			<Localized Culture="de">Copyright (c) 2017 CODESYS Development GmbH</Localized>
+		</String>
+		<String Id="GeneralDescription">
+			<Neutral>This package contains the additional plugin, libraries, devices and further for the CODESYS runtime system for a Debian-Linux based ARM64 device.</Neutral>
+			<Localized Culture="de">Dieses Package enthält das zusätzliche Plugin, Bibliotheken, Geräte und weiteres für das CODESYS-Laufzeitsystem für ein Debian-Linux basiertes ARM64 Gerät.</Localized>
+		</String>
+		<String Id="GeneralLicenseAgreement">
+			<Neutral>Html/CODESYS_EULA_Engineering_en.htm</Neutral>
+			<Localized Culture="de">Html/CODESYS_EULA_Engineering_de.htm</Localized>
+		</String>
+		<String Id="TargetDir">
+			<Neutral>Target directory</Neutral>
+			<Localized Culture="de">Zielordner</Localized>
+		</String>
+		<String Id="TargetDirDescription">
+			<Neutral>The target directory of the example.</Neutral>
+			<Localized Culture="de">In diesen Ordner wird das Beispiel installiert</Localized>
+		</String>
+	</Strings>
+	<General>
+		<Id>7CC31437-70A6-4F27-ABB0-A931DCE4F44A</Id>
+		<Id2>CODESYS.Control for Linux ARM64</Id2>
+		<Version>4.14.0.0</Version>
+		<Name>$GeneralName</Name>
+		<Vendor>CODESYS GmbH</Vendor>
+		<Copyright>$GeneralCopyright</Copyright>
+		<Description>$GeneralDescription</Description>
+		<LicenseAgreement>$GeneralLicenseAgreement</LicenseAgreement>
+		<RequiredInstallerVersion>3.5.17.0</RequiredInstallerVersion>
+	</General>
+	<PackageReferences>
+		<ReferencedPackage>
+			<!-- CODESYS Edge Gateway for Linux -->
+			<ReferencedPackageId>CODESYS.Edge Gateway for Linux</ReferencedPackageId>
+			<ReferencedPackageVersionConstraint>
+				<NewestBetween>
+					<FromVersion>4.10.0.0</FromVersion><!-- EdgeGateway ReferencedPackageVersionConstraint FromVersion -->
+					<ToVersion>4.255.255.255</ToVersion><!-- EdgeGateway ReferencedPackageVersionConstraint ToVersion -->
+				</NewestBetween>
+			</ReferencedPackageVersionConstraint>
+			<ReferenceOptional>False</ReferenceOptional>
+		</ReferencedPackage>
+		<ReferencedPackage>
+			<!-- CODESYS Control SL Extension Package -->
+			<ReferencedPackageId>CODESYS.Control SL Extension Package</ReferencedPackageId>
+			<ReferencedPackageVersionConstraint>
+				<NewestBetween>
+					<FromVersion>4.0.0.0</FromVersion><!-- ExtensionPackage ReferencedPackageVersionConstraint FromVersion -->
+					<ToVersion>4.255.255.255</ToVersion><!-- ExtensionPackage ReferencedPackageVersionConstraint ToVersion -->
+				</NewestBetween>
+			</ReferencedPackageVersionConstraint>
+			<ReferenceOptional>False</ReferenceOptional>
+		</ReferencedPackage>
+		<ReferencedPackage>
+			<!-- ARM64 Codegenerator -->
+			<ReferencedPackageId>CODESYS.Code Generator ARM64</ReferencedPackageId>
+			<ReferencedPackageVersionConstraint>
+				<NewestBetween>
+					<FromVersion>4.0.0.0</FromVersion><!-- Code Generator ARM64 ReferencedPackageVersionConstraint FromVersion -->
+					<ToVersion>4.255.255.255</ToVersion><!-- Code Generator ARM64 ReferencedPackageVersionConstraint ToVersion -->
+				</NewestBetween>
+			</ReferencedPackageVersionConstraint>
+			<ReferenceOptional>False</ReferenceOptional>
+		</ReferencedPackage>
+		<ReferencedPackage>
+			<!-- CODESYS Control SL Deploy Tool -->
+			<ReferencedPackageId>CODESYS.Control SL Deploy Tool</ReferencedPackageId>
+			<ReferencedPackageVersionConstraint>
+				<NewestBetween>
+					<FromVersion>4.10.0.0</FromVersion><!-- Control SL Deploy Tool ReferencedPackageVersionConstraint FromVersion -->
+					<ToVersion>4.255.255.255</ToVersion><!-- Control SL Deploy Tool ReferencedPackageVersionConstraint ToVersion -->
+				</NewestBetween>
+			</ReferencedPackageVersionConstraint>
+			<ReferenceOptional>False</ReferenceOptional>
+		</ReferencedPackage>
+		<ReferencedPackage>
+			<!-- CODESYS CodeMeter for Linux SL -->
+			<ReferencedPackageId>CODESYS.CodeMeter for Linux</ReferencedPackageId>
+			<ReferencedPackageVersionConstraint>
+				<NewestBetween>
+					<FromVersion>4.14.0.0</FromVersion><!-- CodeMeter ReferencedPackageVersionConstraint FromVersion -->
+					<ToVersion>4.255.255.255</ToVersion><!-- CodeMeter ReferencedPackageVersionConstraint ToVersion -->
+				</NewestBetween>
+			</ReferencedPackageVersionConstraint>
+			<ReferenceOptional>False</ReferenceOptional>
+		</ReferencedPackage>
+	</PackageReferences>
+	<TargetDirectoryDefinitions>
+		<TargetDirectoryDefinition>
+			<Id>1</Id>
+			<Name>$TargetDir</Name>
+			<Description>$TargetDirDescription</Description>
+			<PromptUser>True</PromptUser>
+			<DefaultValue>%AP_ROOT%\CODESYS Control for Linux ARM64 SL\%PACKAGE_VERSION%\</DefaultValue>
+		</TargetDirectoryDefinition>
+		<TargetDirectoryDefinition>
+			<Id>2</Id>
+			<Name>RootDir</Name>
+			<Description>RootDir</Description>
+			<PromptUser>False</PromptUser>
+			<DefaultValue>%AP_ROOT%\CODESYS Control for Linux ARM64 SL\</DefaultValue>
+		</TargetDirectoryDefinition>
+	</TargetDirectoryDefinitions>
+	<Components>
+		<Component>
+			<General>
+				<Id>1</Id>
+				<Name>PlugIns</Name>
+				<Description />
+				<Selectable>false</Selectable>
+				<SelectedByDefault>true</SelectedByDefault>
+			</General>
+			<Items>
+				<Folder>
+					<Path>Devices</Path>
+					<IgnoreArchiveFolder>True</IgnoreArchiveFolder>
+					<TargetFolder>$1</TargetFolder>
+				</Folder>
+				<Folder>
+					<Path>Libraries</Path>
+					<IgnoreArchiveFolder>True</IgnoreArchiveFolder>
+					<TargetFolder>$1</TargetFolder>
+				</Folder>
+				<Folder>
+					<Path>Delivery</Path>
+					<IgnoreArchiveFolder>True</IgnoreArchiveFolder>
+					<TargetFolder>$2</TargetFolder>
+				</Folder>
+				<!--
+				<OnlineHelpFile>
+					<Culture>de</Culture>
+					<Path>Help\de\codesys_control_for_linux_ARM64_sl.chm</Path>
+				</OnlineHelpFile>
+				<OnlineHelpFile>
+					<Culture>en</Culture>
+					<Path>Help\en\codesys_control_for_linux_ARM64_sl.chm</Path>
+				</OnlineHelpFile>
+				<OnlineHelpFile>
+					<Culture>es</Culture>
+					<Path>Help\es\codesys_control_for_linux_ARM64_sl.chm</Path>
+				</OnlineHelpFile>
+				<OnlineHelpFile>
+					<Culture>fr</Culture>
+					<Path>Help\fr\codesys_control_for_linux_ARM64_sl.chm</Path>
+				</OnlineHelpFile>
+				<OnlineHelpFile>
+					<Culture>it</Culture>
+					<Path>Help\it\codesys_control_for_linux_ARM64_sl.chm</Path>
+				</OnlineHelpFile>
+				<OnlineHelpFile>
+					<Culture>ja</Culture>
+					<Path>Help\ja\codesys_control_for_linux_ARM64_sl.chm</Path>
+				</OnlineHelpFile>
+				<OnlineHelpFile>
+					<Culture>ru</Culture>
+					<Path>Help\ru\codesys_control_for_linux_ARM64_sl.chm</Path>
+				</OnlineHelpFile>
+				<OnlineHelpFile>
+					<Culture>zh-CHS</Culture>
+					<Path>Help\zh-CHS\codesys_control_for_linux_ARM64_sl.chm</Path>
+				</OnlineHelpFile>
+				<OnlineHelpMerge>
+					<Path>Help\Extensions\codesys_control_for_linux_ARM64_sl.merge</Path>
+				</OnlineHelpMerge>
+-->
+			</Items>
+		</Component>
+		<Component><General><Id>2</Id><Name>Libraries</Name><Description /><Selectable>true</Selectable><SelectedByDefault>true</SelectedByDefault></General><Items><Library><Path>Libraries\AddOns\CODESYS Control SL Libs\CmpSocketUnix\4.10.0.0\\CmpSocketUnix.compiled-library-v3</Path></Library></Items></Component>
+		<Component><General><Id>3</Id><Name>Devices</Name><Description /><Selectable>true</Selectable><SelectedByDefault>true</SelectedByDefault></General><Items><DeviceDescription><Path>Devices\AddOns\CODESYS Control for Linux ARM64 SL\linuxarm64\4.14.0.0\codesyscontrol.devdesc.xml</Path></DeviceDescription></Items></Component>
+<Component><General><Id>4</Id><Name>License</Name><Description /><Selectable>false</Selectable></General><Items><File><TargetFolder>%AP_ROOT%\Licenses</TargetFolder><Path>License\CODESYS Control for Linux ARM64 SL 4.14.0.0.zip</Path><IgnoreArchiveFolder>true</IgnoreArchiveFolder></File></Items></Component></Components>
+</Package>

@@ -1,0 +1,308 @@
+html {
+	height: 100%;
+}
+
+body
+   {
+	margin: 0px;
+   	font-size: 12px;
+    font-family: Arial, sans-serif;
+    color: #636363;
+	background: #ffffff;
+	   
+	min-height: 100vh;  
+	display: flex;
+	flex-direction: column;
+}
+
+issuetable-web-component
+	{
+	flex-grow: 1;
+}
+
+#headerWrapper {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1001;
+    width: 100%;
+    height: 56px;
+    background-color: #333;
+    font-size: 12px;
+    transition: all .3s linear;
+}
+
+#headerWrapper.affix #logoWrapper, #headerWrapper.affix #logoWrapper2 {
+    transition: all .3s linear;
+    top: 8px;
+	margin-left: -17px;
+}
+
+#headerWrapper #logoWrapper, #headerWrapper #logoWrapper2 {
+    float: left;
+    z-index: 1;
+    position: relative;
+    top: 20px;
+    transition: all .3s ease;
+}
+
+.container {
+    width: 75%;
+	margin-right: auto;
+	margin-left: auto;
+	padding-right: 0px;
+}
+
+.container::before  {
+    content: " ";
+    display: table;
+}
+
+
+/***********************************
+************ Headlines *************
+************************************/
+
+h1 {
+    font-family: Roboto,sans-serif;
+    margin-top: 32px;
+    margin-bottom: 32px;
+    color: #e3000f;
+    font-size: 30px;
+}
+
+h2 {
+    font-family: Roboto,sans-serif;
+    margin-top: 32px;
+    margin-bottom: 24px;
+    color: #e3000f;
+    font-size: 26px;
+}
+
+h3 {
+    font-family: Roboto,sans-serif;
+    margin-top: 32px;
+    margin-bottom: 18px;
+    color: #e3000f;
+    font-size: 24px;
+}
+
+h4 {
+    font-family: Roboto,sans-serif;
+    margin-top: 18px;
+    margin-bottom: 18px;
+    color: #636363;
+    font-size: 20px;
+}
+
+h5 {
+    font-family: Roboto,sans-serif;
+    margin-top: 18px;
+    margin-bottom: 18px;
+    color: #636363;
+    font-size: 16px;
+}
+
+
+
+/***********************************
+************ Liste *****************
+************************************/
+
+main ul {
+    list-style: square;
+}
+
+ul.itemizedlist {
+    list-style: square; 
+}
+
+.theme1 .procedure > li::before {
+    background-color: #009ee3;
+}
+
+.list-inline {
+	color: #fff;
+	list-style: none;
+	font-weight: 400;
+	font-size: 16;
+	text-align: right;
+	margin-top: 10px;
+}
+
+
+/***********************************
+************ TABLE *****************
+************************************/
+
+#issuetable {
+	width: 75%;
+	margin-right: auto;
+	margin-left: auto;
+	margin-top: 10;
+}
+
+table-bordered {
+    border: 0px solid #ddd;
+    margin-bottom: 20px;
+    margin-top: 20px;
+    width: 100%;
+}
+
+table {
+    margin-bottom: 0px;
+	width: 75%;
+	margin-right: auto;
+	margin-left: auto;
+	border: none !important;
+	margin-top: 150;
+}
+
+table > tbody > tr > td, table > tbody > tr > th, table > tfoot > tr > td, table > tfoot > tr > th, table > thead > tr > td, table > thead > tr > th {
+    padding: 8px;
+    line-height: 1.6;
+    vertical-align: top;
+    border-top: 1px solid #ddd;
+}
+
+td, th {
+    padding: 8px;
+    line-height: 1.4;
+    vertical-align: top;
+}
+
+tr:nth-child(even) {background-color: hsla(0,0%,93.3%,.8);}
+
+th {
+    background-color: #001e3d;
+    color: white;
+}
+
+.informaltable td p, .informaltable th p, .table td p, .table th p {
+    margin: 0px;
+    margin-bottom: 0px;
+    margin-bottom: 0.2em;
+}
+
+.informaltable td p:last-child, .informaltable th p:last-child, .table td p:last-child, .table th p:last-child {
+    margin-bottom: 0.6em;
+}
+
+/***********************************
+************ CODE ******************
+************************************/
+
+code {
+    color: #e3000f;
+    background-color: rgba(227,0,15,0.08);
+    border-radius: 2px;
+}
+
+/***********************************
+************ CLINK ******************
+************************************/
+
+a {
+	color: #009ee3;
+	text-decoration: none;
+}
+
+a:hover {
+	color: #31c0ff;
+	text-decoration: none;
+}
+
+a:visited {
+	color: #31c0ff;
+	text-decoration: none;
+}
+
+/***********************************
+************ Button *****************
+************************************/
+
+.btn-primary {
+    color: #009ee3;
+    background-color: transparent;
+    font-weight: 400;
+    text-transform: uppercase;
+    position: relative;
+    z-index: 0;
+    overflow: hidden;
+    padding: 6px 12px;
+    font-size: 14px;
+    line-height: 1.65;
+    border-radius: 0;
+    white-space: normal;
+    display: inline-block;
+    margin-bottom: 0;
+    text-align: center;
+    vertical-align: middle;
+    touch-action: manipulation;
+    cursor: pointer;
+    background-image: none;
+    border: 1px solid #009ee3;
+    user-select: none;
+}
+
+
+.btn-primary:hover {
+    color: #fff;
+    background-color: #009ee3;
+    border-color: #009ee3;
+}
+
+/***********************************
+************ Footer *****************
+************************************/
+
+footer .inner-wrapper {
+    background-color: #636363;
+    color: hsla(0,0%,100%,.8);
+    padding-top: 0px;
+    padding-bottom: 30px;
+}
+
+footer .inner-wrapper .col-footer-claim .inner-wrapper {
+    position: relative;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #ccc;
+    margin-bottom: 20px;
+}
+
+footer .inner-wrapper {
+    background-color: #636363;
+    color: hsla(0,0%,100%,.8);
+    padding-top: 0px;
+    padding-bottom: 30px;
+}
+
+footer .inner-wrapper .col-footer-claim .claim {
+    display: inline-block;
+    position: relative;
+    cursor: pointer;
+}
+
+footer .inner-wrapper .col-footer-claim {
+    text-align: right;
+    font-size: 18px;
+    font-weight: 500;
+}
+
+footer .inner-wrapper .col-footer-claim .info {
+    display: none;
+    position: absolute;
+    right: 0;
+    bottom: 60px;
+    background: #009ee3;
+    text-align: left;
+    padding: 10px;
+    font-size: 14px;
+}
+
+footer {
+    font-size: 12px;
+	padding-top: 100px;
+	
+}
+

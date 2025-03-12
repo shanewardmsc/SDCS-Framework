@@ -1,51 +1,31 @@
-FROM ubuntu:18.04
+# Base image for NVIDIA Jetson Nano (Ubuntu 18.04, ARM64)
+# Use ARM64 base image for the NVIDIA Jetson Nano
+FROM arm64v8/ubuntu:18.04
+
 
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
+WORKDIR /opt/codesys
 
-# Update system and install required dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Install dependencies
+RUN apt-get update && apt-get install -y \
     wget \
-    software-properties-common \
     sudo \
-    lsb-release \
-    && rm -rf /var/lib/apt/lists/*
-
-# Add NVIDIA package repositories and install CUDA drivers
-RUN wget https://developer.download.nvidia.com/embedded/L4T/r32_Release_v4.3/T210/jetson-ota-public.asc -O /etc/apt/trusted.gpg.d/jetson-ota-public.asc && \
-    add-apt-repository "deb https://repo.download.nvidia.com/jetson/common r32.4 main" && \
-    add-apt-repository "deb https://repo.download.nvidia.com/jetson/t210 r32.4 main" && \
-    apt-get update && \
-    apt-get install -y --no-install-recommends nvidia-l4t-core && \
-    rm -rf /var/lib/apt/lists/*
-
-# Install CODESYS dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    libx11-6 \
-    libxext6 \
+    libx11-xcb1 \
     libxrender1 \
-    libxrandr2 \
-    libxcursor1 \
-    libglib2.0-0 \
-    libfreetype6 \
-    libfontconfig1 \
+    libxkbcommon-x11-0 \
+    libglu1-mesa \
+    mosquitto-clients \
     && rm -rf /var/lib/apt/lists/*
 
-# Download and install CODESYS runtime (modify URL based on your version)
-RUN wget -O /tmp/codesys-runtime.deb "https://store.codesys.com/media/n98_media_assets/files/4f/22/Runtime_ARM.deb" && \
-    dpkg -i /tmp/codesys-runtime.deb && \
-    rm /tmp/codesys-runtime.deb
+# Copy manually downloaded CODESYS ARM SL package
+COPY ./codesyscontrol_linuxarm64_4.14.0.0_arm64.deb /opt/codesys/codesys_arm.deb
 
-# Configure NVIDIA runtime for Docker
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    nvidia-container-runtime \
-    && rm -rf /var/lib/apt/lists/*
+# Install CODESYS
+RUN dpkg -i /opt/codesys/codesys_arm.deb && rm /opt/codesys/codesys_arm.deb
 
-# Expose CODESYS Web Server Port
-EXPOSE 8080
+# Expose necessary ports
+EXPOSE 8080 1217 11740 1883 8883
 
-# Set up entrypoint script
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/entrypoint.sh"]
+# Start CODESYS runtime
+CMD ["/etc/init.d/codesyscontrol", "start"]
