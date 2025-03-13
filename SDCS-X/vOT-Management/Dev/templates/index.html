@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OT Container Management</title>
+</head>
+<body>
+    <h1>OT Docker Container Management</h1>
+
+    <!-- Display All Containers (Running and Stopped) -->
+    <h2>Available Containers</h2>
+    {% if all_containers %}
+        <ul>
+            {% for container in all_containers %}
+                <li>
+                    <strong>{{ container.name }}</strong> ({{ container.id }})
+                    <p>Status: {{ container.status }} | Ports: {{ container.ports }}</p>
+                    <form action="/stop_container" method="post" style="display:inline;">
+                        <input type="hidden" name="container_id" value="{{ container.id }}">
+                        <button type="submit">Stop</button>
+                    </form>
+                    <form action="/remove_container" method="post" style="display:inline;">
+                        <input type="hidden" name="container_id" value="{{ container.id }}">
+                        <button type="submit">Remove</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No containers available.</p>
+    {% endif %}
+
+    <!-- Display Running Containers -->
+    <h2>Running Containers</h2>
+    {% if running_containers %}
+        <ul>
+            {% for container in running_containers %}
+                <li>
+                    <strong>{{ container.name }}</strong> ({{ container.id }})
+                    <p>Ports: {{ container.ports }}</p>
+                    <form action="/stop_container" method="post" style="display:inline;">
+                        <input type="hidden" name="container_id" value="{{ container.id }}">
+                        <button type="submit">Stop</button>
+                    </form>
+                    <form action="/remove_container" method="post" style="display:inline;">
+                        <input type="hidden" name="container_id" value="{{ container.id }}">
+                        <button type="submit">Remove</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No running containers available.</p>
+    {% endif %}
+
+    <!-- Display Stopped Containers -->
+    <h2>Stopped Containers</h2>
+    {% if stopped_containers %}
+        <ul>
+            {% for container in stopped_containers %}
+                <li>
+                    <strong>{{ container.name }}</strong> ({{ container.id }})
+                    <form action="/start_container" method="post" style="display:inline;">
+                        <input type="hidden" name="container_id" value="{{ container.id }}">
+                        <button type="submit">Start</button>
+                    </form>
+                    <form action="/remove_container" method="post" style="display:inline;">
+                        <input type="hidden" name="container_id" value="{{ container.id }}">
+                        <button type="submit">Remove</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No stopped containers available.</p>
+    {% endif %}
+
+    <!-- Display Available Images -->
+    <h2>Available Images</h2>
+    {% if all_images %}
+        <ul>
+            {% for image in all_images %}
+                <li>
+                    <strong>{{ image.id }}</strong> ({{ image.tags }})
+                    <form action="/build_container" method="post" style="display:inline;">
+                        <input type="hidden" name="image_id" value="{{ image.id }}">
+                        <button type="submit">Build Container</button>
+                    </form>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No images available.</p>
+    {% endif %}
+
+    <!-- Form to start a new container -->
+    <h2>Start a New Container</h2>
+    <form action="/start_container" method="post">
+        <label for="image">Select Image:</label>
+        <select name="image" id="image">
+            {% if all_images %}
+                {% for image in all_images %}
+                    <option value="{{ image.id }}">{{ image.id }} ({{ image.tags | join(", ") }})</option>
+                {% endfor %}
+            {% else %}
+                <option>No images available</option>
+            {% endif %}
+        </select>
+        <button type="submit">Run</button>
+    </form>
+
+    <!-- Form to execute command in a container -->
+    <h2>Execute Command</h2>
+    <form action="/execute_command" method="post">
+        <input type="text" name="container_id" placeholder="Container ID" required>
+        <input type="text" name="command" placeholder="Command" required>
+        <button type="submit">Execute</button>
+    </form>
+
+</body>
+</html>
+
