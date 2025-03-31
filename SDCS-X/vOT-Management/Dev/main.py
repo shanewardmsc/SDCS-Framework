@@ -14,7 +14,9 @@ from docker_utils import DockerInterface, DockerController
 from fastapi import FastAPI, Request, Form, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
+from fastapi.staticfiles import StaticFiles
 from collections import deque
+from influxdb_client import InfluxDBClient, Point, WritePrecision
 
 # Initialize FastAPI and templates
 app = FastAPI()
@@ -24,6 +26,22 @@ templates = Jinja2Templates(directory="templates")
 docker = DockerInterface()
 client = docker.docker_connect()
 docker_ctrl = DockerController(client)
+
+# Machine Configuration (Migrate to DB)
+machines_data = [
+    {"id": "machine_1", "name": "Machine A"},
+    {"id": "machine_2", "name": "Machine B"}
+]
+
+# InfluxDB Configuration
+INFLUXDB_URL = "http://localhost:8086"  # Use the container name in Docker network
+INFLUXDB_TOKEN = "EfONdgGfDr3LSOgs8zdKOD12zz3sKRygX1oqibXA3lmpXCnWsA0WnOJ5bKo7S-FEHevvwf0DEEZfHqDXUbMyJg=="  # Token for authentication
+INFLUXDB_ORG = "MTU"  # Organization name (set in InfluxDB UI)
+INFLUXDB_BUCKET = "vHIS"  # Bucket name (created in UI)
+
+# Initialize InfluxDB Client
+influx_client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLUXDB_ORG)
+write_api = influx_client.write_api()
 
 # MQTT Config
 BROKER = "test.mosquitto.org"
@@ -61,7 +79,7 @@ def on_message(client, userdata, message):
         False
         #print(f"Received non-UTF-8 message from topic '{topic}': {message.payload}")
     
-    mqtt_messages.append(f"{topic}: {payload}")
+    #mqtt_messages.append(f"{topic}: {payload}")
     
     # Service Discovery - Log new topics dynamically
     if topic not in DISCOVERED:
@@ -71,6 +89,20 @@ def on_message(client, userdata, message):
     # Only process messages from known microservices
     if topic in TOPICS:
         print(f"OT Manager Service Received: '{payload}' from topic '{topic}'")
+        mqtt_messages.append(f"{topic}: {payload}")
+        
+        # Store MQTT messages in InfluxDB
+        # Get current time in seconds and convert to nanoseconds
+        timestamp = int(time.time() * 1e9)  # Convert to nanoseconds
+
+        # Create a simple data point
+        point = Point("mqtt_messages") \
+            .tag("topic", "vPLC/status") \
+            .field("message", "Container started") \
+            .time(timestamp, WritePrecision.NS)
+        write_api.write(bucket=INFLUXDB_BUCKET, org=INFLUXDB_ORG, record=point)
+
+        print(f"Stored in InfluxDB: {topic} -> {payload}")
     
 # Create MQTT client
 try:
@@ -84,6 +116,45 @@ try:
     
 except Exception as e:
     print(f"Failed to connect to MQTT broker: {e}")
+
+###############
+
+@app.get("/machine/{machine_id}/controls")
+def view_machine_controls(request: Request, machine_id: int):
+    # Example control elements (Later, fetch from DB)
+    controls = [
+        {"id": 1, "name": "vPLC", "status": "Running", "status_class": "green"},
+        {"id": 2, "name": "vHMI", "status": "Stopped", "status_class": "red"},
+        {"id": 3, "name": "vROB", "status": "Idle", "status_class": "orange"},
+    ]
+    
+    return templates.TemplateResponse("vOT_Mgmt_Machine_Elements.html", {
+        "request": request,
+        "machine_id": machine_id,
+        "controls": controls
+    })
+
+@app.get("/machines")
+async def get_machines(request: Request):
+    return templates.TemplateResponse("vOT_Mgmt_Overview.html", {"request": request, "machines": machines_data})
+
+@app.post("/add_machine")
+async def add_machine(request: Request, machine_name: str):
+    new_machine = {"id": f"machine_{len(machines_data)+1}", "name": machine_name}
+    machines_data.append(new_machine)
+    return templates.TemplateResponse("machine.html", {"request": request, "machines": machines_data})
+
+@app.get("/containers/{machine_id}")
+async def container_management(request: Request, machine_id: str):
+    return templates.TemplateResponse("index.html", {"request": request, "machine_id": machine_id})
+
+
+
+#################
+
+
+
+
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
@@ -140,6 +211,9 @@ async def remove_container(container_id: str = Form(...)):
 @app.get("/mqtt_messages")
 async def get_mqtt_messages():
     return JSONResponse(content=list(mqtt_messages))
+
+
+
 
 
 if __name__ == "__main__":

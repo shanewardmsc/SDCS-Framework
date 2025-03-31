@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Management</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: black;
+        }
+        h1 {
+            text-align: center;
+            padding: 20px;
+            background-color: #007bff;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 36px;
+            border-radius: 5px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .machine-list {
+            list-style: none;
+            padding: 0;
+        }
+        .machine-item {
+            padding: 10px;
+            background: #e9ecef;
+            margin: 5px 0;
+            border-radius: 5px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .add-machine-form {
+            margin-top: 20px;
+        }
+        .add-machine-form input, .add-machine-form button {
+            padding: 8px;
+            margin: 5px 0;
+            display: block;
+            width: 100%;
+        }
+        button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+    <h1>Machine Management</h1>
+    <div class="container">
+        <h2>Available Machines</h2>
+        <ul class="machine-list" id="machine-list">
+            {% if machines %}
+                {% for machine in machines %}
+                    <li class="machine-item">
+                        <span>{{ machine.name }}</span>
+                        <a href="/machines/{{ machine.id }}">View Services</a>
+                    </li>
+                {% endfor %}
+            {% else %}
+                <p>No machines available. Add a new machine below.</p>
+            {% endif %}
+        </ul>
+        
+        <ul>
+            {% for machine in machines %}
+            <li onclick="navigateToMachine('{{ machine.id }}')">
+                <strong>{{ machine.name }}</strong> ({{ machine.id }})
+            </li>
+            {% endfor %}
+        </ul>
+
+<script>
+    function navigateToMachine(machineId) {
+        window.location.href = `/containers/${machineId}`;  // Redirects to index.html for container management
+    }
+</script>
+        
+        <div class="add-machine-form">
+            <h2>Add a New Machine</h2>
+            <form action="/add_machine" method="post">
+                <input type="text" name="machine_name" placeholder="Enter machine name" required>
+                <button type="submit">Add Machine</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

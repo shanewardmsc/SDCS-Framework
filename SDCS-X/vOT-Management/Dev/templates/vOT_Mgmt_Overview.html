@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Line - Machines</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        h1 {
+            text-align: center;
+            padding: 20px;
+            background-color: #007bff;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 36px;
+            border-radius: 5px;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 0 20px;
+            margin-bottom: 40px;
+        }
+        .machine-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            text-align: center;
+            transition: transform 0.3s ease-in-out;
+        }
+        .machine-card:hover {
+            transform: scale(1.05); /* Slightly enlarge the card on hover */
+        }
+        .machine-status {
+            font-size: 14px;
+            margin-top: 10px;
+            color: #fff;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .green { background-color: green; }
+        .red { background-color: red; }
+        .orange { background-color: orange; }
+        .add-machine-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            max-width: 300px; /* Limit the width */
+            margin: 20px auto;
+        }
+        .add-machine-btn:hover {
+            background-color: #218838;
+        }
+        form {
+            display: flex;
+            justify-content: center;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        form input {
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 100%;
+            max-width: 300px; /* Limit the width of the input */
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column; /* Stack the cards on smaller screens */
+                align-items: center;
+            }
+            .machine-card {
+                width: 90%; /* Make the cards take up more width on smaller screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>OT Management Service - Process Overview</h1>
+
+    <div class="container">
+        {% for machine in machines %}
+        <div class="machine-card">
+            <h3>{{ machine.name }}</h3>
+            <div class="machine-status {{ machine.status_class }}">
+                <span>{{ machine.status }}</span>
+            </div>
+            <a href="/machine/{{ machine.id }}/controls" class="btn">View Control Services</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <form action="/add_machine" method="post">
+        <input type="text" name="machine_name" placeholder="Enter machine name" required>
+        <button type="submit" class="add-machine-btn">Add Machine</button>
+    </form>
+</body>
+</html>

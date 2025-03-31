@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Machine Details</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+        }
+        h1 {
+            text-align: center;
+            padding: 20px;
+            background-color: #007bff;
+            color: white;
+            margin-bottom: 20px;
+            font-size: 36px;
+            border-radius: 5px;
+        }
+        .container {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 0 20px;
+        }
+        .container-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            width: 250px;
+            text-align: center;
+        }
+        .container-status {
+            font-size: 14px;
+            margin-top: 10px;
+            color: #fff;
+            padding: 5px;
+            border-radius: 5px;
+        }
+        .green { background-color: green; }
+        .red { background-color: red; }
+        .orange { background-color: orange; }
+        .add-container-btn {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .add-container-btn:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>Machine Details - {{ machine_name }}</h1>
+
+    <div class="container">
+        {% for container in containers %}
+        <div class="container-card">
+            <h3>{{ container.name }}</h3>
+            <div class="container-status {{ container.status_class }}">
+                <span>{{ container.status }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <form action="/add_container/{{ machine_id }}" method="post">
+        <input type="text" name="container_name" placeholder="Enter container name" required>
+        <button type="submit" class="add-container-btn">Add Container</button>
+    </form>
+</body>
+</html>

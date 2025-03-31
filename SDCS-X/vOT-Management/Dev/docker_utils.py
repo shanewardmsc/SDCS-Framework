@@ -171,6 +171,19 @@ class DockerController:
             print("Error: docker_utils() ", str(error))
             return
 
+    def remove_container(self, container_id):
+        try:
+            container = self.client.containers.get(container_id)
+            container.remove(force=True)
+            print(f"Container {container_id} removed successfully.")
+        except docker.errors.NotFound as error:
+            print(f"Error: docker_utils() Container {container_id} not found.")
+        except docker.errors.APIError as error:
+            print(f"Error: docker_utils() API error: {str(error)}")
+        except Exception as error:
+            print(f"Error: docker_utils() General exception occurred: {str(error)}")
+
+
     def remove_all_containers(self):
         try:
             delete_containers = self.client.containers.prune(filters={'status': 'exited'})
