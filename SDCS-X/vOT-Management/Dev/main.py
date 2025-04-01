@@ -120,7 +120,7 @@ except Exception as e:
 ###############
 
 @app.get("/machine/{machine_id}/controls")
-def view_machine_controls(request: Request, machine_id: int):
+def view_machine_controls(request: Request, machine_id: str):
     # Example control elements (Later, fetch from DB)
     controls = [
         {"id": 1, "name": "vPLC", "status": "Running", "status_class": "green"},
