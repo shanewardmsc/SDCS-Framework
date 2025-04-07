@@ -9,14 +9,21 @@ import os
 import sys
 import time
 import uvicorn
+import webbrowser
+import threading
 import paho.mqtt.client as mqtt
 from docker_utils import DockerInterface, DockerController
-from fastapi import FastAPI, Request, Form, Depends
+from fastapi import FastAPI, Request, Form, Depends, HTTPException, status, Cookie
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse, HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from collections import deque
 from influxdb_client import InfluxDBClient, Point, WritePrecision
+from hashlib import sha256
+
+# Global Variables
+host_ip = "0.0.0.0"
+port_no = 9970
 
 # Initialize FastAPI and templates
 app = FastAPI()
@@ -29,8 +36,8 @@ docker_ctrl = DockerController(client)
 
 # Machine Configuration (Migrate to DB)
 machines_data = [
-    {"id": "machine_1", "name": "Machine A"},
-    {"id": "machine_2", "name": "Machine B"}
+    {"id": "00101_Depal_Cell", "name": "Robotic Depalletizer"},
+    #{"id": "00102_Inspect_Cell", "name": "Vision Quality Inspection"}
 ]
 
 # InfluxDB Configuration
@@ -61,6 +68,15 @@ TOPICS = {
 }
 DISCOVERED = set()
 
+# Simple users dictionary for demo
+users = {
+    "admin": sha256("password".encode()).hexdigest(),  # Store hashed password for security
+    "user": sha256("1234".encode()).hexdigest()
+}
+
+# User login status (store in a simple dict for now, use a session or DB in production)
+logged_in_users = {}
+
 # MQTT Connection Callback
 MQTT_TOPIC = "vOT-Mgmt/status"
 def on_connect(client, userdata, flags, rc):
@@ -68,34 +84,22 @@ def on_connect(client, userdata, flags, rc):
     client.subscribe(MQTT_TOPIC)
 
 mqtt_messages = deque(maxlen=100)
+
 # MQTT Message Callback
 def on_message(client, userdata, message):
     topic = message.topic
     payload = ""
     try:
         payload = message.payload.decode("utf-8")
-        #print(f"Main Service Received: '{payload}' from topic '{topic}'")
     except UnicodeDecodeError:
         False
-        #print(f"Received non-UTF-8 message from topic '{topic}': {message.payload}")
-    
-    #mqtt_messages.append(f"{topic}: {payload}")
-    
-    # Service Discovery - Log new topics dynamically
-    if topic not in DISCOVERED:
-        DISCOVERED.add(topic)
-        #print(f"Discovered new topic: {topic}")
 
-    # Only process messages from known microservices
     if topic in TOPICS:
         print(f"OT Manager Service Received: '{payload}' from topic '{topic}'")
         mqtt_messages.append(f"{topic}: {payload}")
         
         # Store MQTT messages in InfluxDB
-        # Get current time in seconds and convert to nanoseconds
         timestamp = int(time.time() * 1e9)  # Convert to nanoseconds
-
-        # Create a simple data point
         point = Point("mqtt_messages") \
             .tag("topic", "vPLC/status") \
             .field("message", "Container started") \
@@ -110,53 +114,89 @@ try:
     mqtt_client.on_message = on_message
     mqtt_client.connect(BROKER, PORT)
     mqtt_client.subscribe(TOPIC_ALL)  # Listen to all microservices
-
-    # Start listening
     mqtt_client.loop_start()
-    
 except Exception as e:
     print(f"Failed to connect to MQTT broker: {e}")
 
-###############
+#############################
+# User Authentication Routes
 
-@app.get("/machine/{machine_id}/controls")
-def view_machine_controls(request: Request, machine_id: str):
-    # Example control elements (Later, fetch from DB)
-    controls = [
-        {"id": 1, "name": "vPLC", "status": "Running", "status_class": "green"},
-        {"id": 2, "name": "vHMI", "status": "Stopped", "status_class": "red"},
-        {"id": 3, "name": "vROB", "status": "Idle", "status_class": "orange"},
-    ]
-    
-    return templates.TemplateResponse("vOT_Mgmt_Machine_Elements.html", {
-        "request": request,
-        "machine_id": machine_id,
-        "controls": controls
-    })
+@app.get("/login")
+async def login_page(request: Request):
+    return templates.TemplateResponse("vOT_Mgmt_Login.html", {"request": request})
 
-@app.get("/machines")
+
+@app.post("/login")
+async def login(request: Request, username: str = Form(...), password: str = Form(...)):
+    # Hash the password and check against stored users
+    hashed_password = sha256(password.encode()).hexdigest()
+    if username in users and users[username] == hashed_password:
+        # Set the user as logged in (simple session tracking)
+        response = RedirectResponse(url="/", status_code=status.HTTP_303_SEE_OTHER)
+        response.set_cookie(key="username", value=username)  # Store the username in the cookie
+        logged_in_users[username] = True
+        return response
+    else:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid credentials")
+
+
+@app.get("/logout")
+async def logout(request: Request):
+    # Logout user by clearing the session (cookie)
+    username = request.cookies.get("username")
+    if username:
+        response = RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+        response.delete_cookie("username")
+        logged_in_users.pop(username, None)
+        return response
+    else:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+
+#############################
+# Protected Routes
+@app.get("/")
 async def get_machines(request: Request):
+    username = request.cookies.get("username")
+    if not username or username not in logged_in_users:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    
     return templates.TemplateResponse("vOT_Mgmt_Overview.html", {"request": request, "machines": machines_data})
 
+
 @app.post("/add_machine")
-async def add_machine(request: Request, machine_name: str):
-    new_machine = {"id": f"machine_{len(machines_data)+1}", "name": machine_name}
+async def add_machine(request: Request, machine_name: str = Form(...)):
+    username = request.cookies.get("username")
+    if not username or username not in logged_in_users:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    new_machine = {"id": f"machine_{len(machines_data) + 1}", "name": machine_name}
     machines_data.append(new_machine)
-    return templates.TemplateResponse("machine.html", {"request": request, "machines": machines_data})
+    return templates.TemplateResponse("vOT_Mgmt_Overview.html", {"request": request, "machines": machines_data})
+    
+    
+@app.post("/remove_machine")
+async def remove_machine(request: Request, machine_name: str = Form(...)):
+    username = request.cookies.get("username")
+    if not username or username not in logged_in_users:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+
+    global machines_data
+    machines_data = [machine for machine in machines_data if machine['name'] != machine_name]
+    
+    return templates.TemplateResponse("vOT_Mgmt_Overview.html", {"request": request, "machines": machines_data})
+
 
 @app.get("/containers/{machine_id}")
 async def container_management(request: Request, machine_id: str):
+    username = request.cookies.get("username")
+    if not username or username not in logged_in_users:
+        return RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
+    
     return templates.TemplateResponse("index.html", {"request": request, "machine_id": machine_id})
 
 
-
-#################
-
-
-
-
-
-@app.get("/", response_class=HTMLResponse)
+@app.get("/machines", response_class=HTMLResponse)
 async def home(request: Request):
     try:
         all_containers = docker_ctrl.list_all_containers()
@@ -168,7 +208,7 @@ async def home(request: Request):
         all_containers = []
         all_images = []
 
-    return templates.TemplateResponse("index.html", {
+    return templates.TemplateResponse("vOT_Mgmt_Machines.html", {
         "request": request,
         "all_containers": all_containers,
         "all_images": all_images,
@@ -194,6 +234,13 @@ async def start_container(image: str = Form(...)):
         return {"error": str(e)}
 
 
+@app.post("/restart_container")
+async def restart_container(container_id: str = Form(...)):
+    docker_ctrl.restart_container(container_id)
+    mqtt_client.publish(MQTT_TOPIC, f"Container {container_id} restarted")
+    return RedirectResponse(url="/", status_code=303)
+
+
 @app.post("/stop_container")
 async def stop_container(container_id: str = Form(...)):
     docker_ctrl.stop_container(container_id)
@@ -213,9 +260,17 @@ async def get_mqtt_messages():
     return JSONResponse(content=list(mqtt_messages))
 
 
-
+def open_browser():
+    time.sleep(2)  # Delay - ensure server has started
+    
+    # Open the browser automatically to the correct address
+    url_app = "http://" + str(host_ip) + ":" + str(port_no)
+    webbrowser.get('firefox').open(url_app)
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=9970)
-
+    
+    browser_thread = threading.Thread(target=open_browser)
+    browser_thread.start()
+    
+    uvicorn.run(app, host=host_ip, port=port_no)

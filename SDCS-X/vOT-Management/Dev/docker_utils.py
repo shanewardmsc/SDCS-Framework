@@ -87,6 +87,7 @@ class DockerController:
             print("Error: docker_utils() ", str(error))
             return
 
+
     def list_running_containers(self):
         # Start instance with id 'instance_id'
         try:
@@ -106,6 +107,7 @@ class DockerController:
             print("Error: docker_utils() ", str(error),)
             return
 
+
     def run_container(self, image):
         try:
             # Start the container using the given image
@@ -123,6 +125,27 @@ class DockerController:
             return None
         except Exception as error:
             print(f"Error: docker_utils() {str(error)}")
+            return None
+
+
+    def restart_container(self, container_id):
+        try:
+            container = self.client.containers.get(container_id)
+            if container.status == "exited":
+                container.start()
+                print(f"Container {container_id} restarted successfully.")
+            else:
+                print(f"Container {container_id} is already running.")
+            return container.id
+            
+        except docker.errors.NotFound:
+            print(f"Error: Container {container_id} not found.")
+            return None
+        except docker.errors.APIError as error:
+            print(f"Error: {str(error)}")
+            return None
+        except Exception as error:
+            print(f"Unexpected error: {str(error)}")
             return None
 
 
@@ -159,17 +182,38 @@ class DockerController:
             print("Error: docker_utils() ", str(error))
             return
 
-    def view_port_mappings(self, container):
-        try:
-            container = self.client.containers.get(container)
-            print("Container ports: ", str(container.ports))
 
+    def view_port_mappings(self, container_name):
+        try:
+            container = self.client.containers.get(container_name)
+            port_mappings = container.ports
+            
+            # Initialize a dictionary to store port mappings
+            port_mapping_info = {}
+            
+            if port_mappings:
+                for port, mappings in port_mappings.items():
+                    if mappings:  # Check if mappings is not None
+                        host_info = []
+                        for mapping in mappings:
+                            host_ip = mapping.get('HostIp', 'Not Available')
+                            host_port = mapping.get('HostPort', 'Not Available')
+                            host_info.append(f"Host IP: {host_ip}, Host Port: {host_port}")
+                        port_mapping_info[port] = host_info
+                    else:
+                        port_mapping_info[port] = ["Not mapped to any host port."]
+            else:
+                port_mapping_info["No Ports"] = ["No ports are mapped."]
+            
+            return port_mapping_info
+                
         except docker.errors.APIError as error:
-            print("Error: docker_utils() ", str(error))
-            return
+            print(f"Error fetching container info: {str(error)}")
+            return {"Error": str(error)}
         except Exception as error:
-            print("Error: docker_utils() ", str(error))
-            return
+            print(f"Unexpected error: {str(error)}")
+            return {"Error": str(error)}
+
 
     def remove_container(self, container_id):
         try:

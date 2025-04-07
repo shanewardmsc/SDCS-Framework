@@ -11,14 +11,22 @@
             padding: 0;
             background-color: #f8f9fa;
         }
-        h1 {
-            text-align: center;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 20px;
             background-color: #007bff;
             color: white;
-            margin-bottom: 20px;
-            font-size: 36px;
             border-radius: 5px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+        .header .overview-text {
+            font-size: 20px;
+            font-weight: bold;
         }
         .container {
             display: flex;
@@ -92,7 +100,12 @@
     </style>
 </head>
 <body>
-    <h1>OT Management Service - Control Elements for Machine {{ machine_id }}</h1>
+    <div class="header">
+        <h1>OT Management Service</h1>
+        <span class="overview-text">MACHINE OVERVIEW</span>
+    </div>
+    
+    <h2 style="text-align: center;">{{ machine_id }}</h2>
 
     <div class="container">
         {% for control in controls %}
@@ -112,3 +125,4 @@
     </form>
 </body>
 </html>
+

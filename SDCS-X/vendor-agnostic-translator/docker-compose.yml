@@ -1,0 +1,53 @@
+version: "3.8"
+services:
+  vhis:
+    image: influxdb:latest
+    container_name: vhis
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=sensor_data
+    networks:
+      - ot_network
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+
+  vhmi:
+    image: grafana/grafana:latest
+    container_name: vhmi
+    ports:
+      - "3000:3000"
+    depends_on:
+      - vhis
+    networks:
+      - ot_network
+    volumes:
+      - grafana_data:/var/lib/grafana
+
+  vplc:
+    image: labshock-plc
+    container_name: vplc
+    ports:
+      - "502:502"
+      - "8080:8080"  # OpenPLC Web UI
+    networks:
+      - ot_network
+
+  vtrans:
+    build: ./vtrans
+    container_name: vtrans
+    ports:
+      - "8010:8010"
+    depends_on:
+      - vplc
+      - vhis
+    networks:
+      - ot_network
+
+networks:
+  ot_network:
+
+volumes:
+  influxdb_data:
+  grafana_data:
+

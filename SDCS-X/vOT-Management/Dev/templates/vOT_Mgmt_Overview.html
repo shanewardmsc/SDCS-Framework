@@ -11,22 +11,37 @@
             padding: 0;
             background-color: #f8f9fa;
         }
-        h1 {
-            text-align: center;
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 20px;
             background-color: #007bff;
             color: white;
-            margin-bottom: 20px;
-            font-size: 36px;
             border-radius: 5px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+        .process-overview {
+            font-size: 20px;
+            font-weight: bold;
         }
         .container {
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            gap: 20px;
             padding: 0 20px;
+            gap: 10px;
             margin-bottom: 40px;
+        }
+        .machine-title {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
         }
         .machine-card {
             background-color: white;
@@ -38,7 +53,7 @@
             transition: transform 0.3s ease-in-out;
         }
         .machine-card:hover {
-            transform: scale(1.05); /* Slightly enlarge the card on hover */
+            transform: scale(1.05);
         }
         .machine-status {
             font-size: 14px;
@@ -50,7 +65,7 @@
         .green { background-color: green; }
         .red { background-color: red; }
         .orange { background-color: orange; }
-        .add-machine-btn {
+        .add-machine-btn, .remove-machine-btn {
             margin-top: 20px;
             padding: 10px 20px;
             background-color: #28a745;
@@ -59,11 +74,14 @@
             border-radius: 4px;
             cursor: pointer;
             width: 100%;
-            max-width: 300px; /* Limit the width */
+            max-width: 300px;
             margin: 20px auto;
         }
-        .add-machine-btn:hover {
+        .add-machine-btn:hover, .remove-machine-btn:hover {
             background-color: #218838;
+        }
+        .remove-machine-btn {
+            background-color: #dc3545;
         }
         form {
             display: flex;
@@ -78,22 +96,84 @@
             border: 1px solid #ccc;
             border-radius: 4px;
             width: 100%;
-            max-width: 300px; /* Limit the width of the input */
+            max-width: 300px;
         }
-
+        .comm-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 40px 20px;
+            gap: 20px;
+        }
+        .comm-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            width: 45%;
+            text-align: left;
+            transition: transform 0.3s ease-in-out;
+        }
+        .comm-card:hover {
+            transform: scale(1.05);
+        }
+        .process-stats-container {
+            display: flex;
+            justify-content: space-between;
+            margin: 40px 20px;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+        .process-stat-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            width: 45%;
+            text-align: center;
+            transition: transform 0.3s ease-in-out;
+        }
+        .process-stat-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0px 6px 10px rgba(0, 0, 0, 0.2);
+        }
+        .process-stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            font-size: 16px;
+        }
+        .process-stat-item b {
+            text-align: left;
+            width: 50%;
+        }
+        .process-stat-item span {
+            width: 45%;
+            text-align: right;
+            font-weight: 600;
+        }
         @media (max-width: 768px) {
-            .container {
-                flex-direction: column; /* Stack the cards on smaller screens */
-                align-items: center;
+            .header {
+                flex-direction: column;
+                text-align: center;
             }
-            .machine-card {
-                width: 90%; /* Make the cards take up more width on smaller screens */
+            .container, .comm-container, .process-stats-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 20px;
+            }
+            .machine-card, .comm-card, .process-stat-card {
+                width: 90%;
             }
         }
     </style>
 </head>
 <body>
-    <h1>OT Management Service - Process Overview</h1>
+    <div class="header">
+        <h1>OT Management Service</h1>
+        <span class="process-overview">OVERVIEW</span>
+    </div>
+
+    <div class="machine-title">PRODUCTION LINE</div>
 
     <div class="container">
         {% for machine in machines %}
@@ -102,7 +182,11 @@
             <div class="machine-status {{ machine.status_class }}">
                 <span>{{ machine.status }}</span>
             </div>
-            <a href="/machine/{{ machine.id }}/controls" class="btn">View Control Services</a>
+            <a href="/machines/" class="btn">Machine Details</a>
+            <form action="/remove_machine" method="post">
+                <input type="hidden" name="machine_id" value="{{ machine.id }}">
+                <button type="submit" class="remove-machine-btn">Remove Machine</button>
+            </form>
         </div>
         {% endfor %}
     </div>
@@ -111,5 +195,91 @@
         <input type="text" name="machine_name" placeholder="Enter machine name" required>
         <button type="submit" class="add-machine-btn">Add Machine</button>
     </form>
+
+    <div class="machine-title">PROCESS STATISTICS</div>
+
+    <div class="process-stats-container">
+        <div class="process-stat-card">
+            <div class="process-stat-item">
+                <b>Shift Length</b><span>8 hours</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Breaks</b><span>{{ breaks }}</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Downtime</b><span>{{ downtime }}</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Ideal Cycle Time</b><span>{{ ideal_cycle_time }}</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Total Count</b><span>{{ total_count }}</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Reject Count</b><span>{{ reject_count }}</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Planned Production Time</b><span>{{ planned_production_time }}</span>
+            </div>
+        </div>
+        <div class="process-stat-card">
+            <div class="process-stat-item">
+                <b>Run Time</b><span>{{ run_time }}</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Pass Count</b><span>{{ pass_count }}</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Availability</b><span>{{ availability }}</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Performance</b><span>{{ performance }}</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Quality</b><span>{{ quality }}</span>
+            </div>
+            <div class="process-stat-item">
+                <b>OEE</b><span>{{ oee }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="machine-title">UPSTREAM / DOWNSTREAM COMMUNICATION</div>
+
+    <div class="comm-container">
+        <div class="comm-card">
+            <h3>IT Upstream</h3>
+            <p>Monitor and manage IT communication channels and protocols.</p>
+        </div>
+        <div class="comm-card">
+            <h3>OT Downstream</h3>
+            <div class="mqtt-container">
+                <ul id="mqtt-messages"></ul>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+      async function fetchMQTTMessages() {
+        try {
+          const response = await fetch("/mqtt_messages");
+          const messages = await response.json();
+          const messagesList = document.getElementById("mqtt-messages");
+          messagesList.innerHTML = ""; // Clear previous messages
+                    
+          messages.forEach(message => {
+            let listItem = document.createElement("li");
+            listItem.textContent = message;
+            messagesList.appendChild(listItem);
+          });
+        } catch (error) {
+          console.error("Error fetching MQTT messages:", error);
+        }
+      }
+
+      // Fetch messages every 0.5 seconds
+      setInterval(fetchMQTTMessages, 500);
+    </script>
 </body>
 </html>
+
