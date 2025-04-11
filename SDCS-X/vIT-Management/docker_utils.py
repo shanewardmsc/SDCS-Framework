@@ -70,8 +70,8 @@ class DockerController:
 
     def list_ot_containers(self):
         try:
-            # Define the filter for containers with label domain="ot_domain"
-            filters = {"label": "domain=OT_DOMAIN"}
+            # Define the filter for containers with label domain="OT_DOMAIN"
+            filters = {"labels": "domain=OT_DOMAIN"}
 
             # List all containers with the filter applied
             ot_containers = self.client.containers.list(all=True, filters=filters)
@@ -85,7 +85,7 @@ class DockerController:
                 cont_idx += 1
 
             if cont_idx == 0:
-                print("Error: No containers found with label 'domain=ot_domain'")
+                print("Error: No containers found with label 'domain=OT_DOMAIN'")
 
             return ot_containers
 
@@ -101,8 +101,8 @@ class DockerController:
             
     def list_it_containers(self):
         try:
-            # Define the filter for containers with label domain="it_domain"
-            filters = {"label": "domain=IT_DOMAIN"}
+            # Define the filter for containers with label domain="ot_domain"
+            filters = {"labels": "domain=IT_DOMAIN"}
 
             # List all containers with the filter applied
             it_containers = self.client.containers.list(all=True, filters=filters)
@@ -116,7 +116,7 @@ class DockerController:
                 cont_idx += 1
 
             if cont_idx == 0:
-                print("Error: No containers found with label 'domain=it_domain'")
+                print("Error: No containers found with label 'domain=IT_DOMAIN'")
 
             return it_containers
 

@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IT Management Service</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: black;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;  /* Distribute space between the items */
+            align-items: center;
+            padding: 20px;
+            background-color: #007bff;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 36px;
+            text-align: left; /* Align the "IT Management Service" to the left */
+        }
+
+        .process-overview {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: right; /* Align the "MACHINES" to the right */
+            margin-left: auto; /* Push this item to the far right */
+        }
+
+        h2 {
+            color: #007bff;
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        .container-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            padding: 0 20px;
+        }
+
+        .container-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 15px;
+            width: 100%;
+        }
+
+        .container-card {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+            text-align: center;
+        }
+
+        .container-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .container-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: 10px;
+        }
+
+        button {
+            padding: 6px 12px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+
+        .start-button {
+            background-color: #28a745;
+            color: white;
+        }
+
+        .start-button:hover {
+            background-color: #218838;
+        }
+
+        .stop-button {
+            background-color: #dc3545;
+            color: white;
+        }
+
+        .stop-button:hover {
+            background-color: #c82333;
+        }
+
+        .status-running {
+            background-color: #28a745;
+            color: white;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .status-exited {
+            background-color: #dc3545;
+            color: white;
+            padding: 5px;
+            border-radius: 4px;
+        }
+
+        .launch-button {
+            background-color: #007bff;
+            color: white;
+            padding: 6px 12px;
+            border: none;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .launch-button:hover {
+            background-color: #0056b3;
+        }
+        
+        .create-container-card {
+            background-color: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .create-container-card select, .create-container-card input {
+            padding: 8px;
+            margin-top: 10px;
+            width: 100%;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+
+        .create-container-card button {
+            background-color: #007bff;
+            color: white;
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+
+        .create-container-card button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>IT Management Service</h1>
+        <span class="process-overview">SERVICES</span>
+    </div>
+
+
+    <div class="container-wrapper">
+        <div class="container-section" id="allContainers">
+            <h2>Available Containers</h2>
+            {% if all_containers %}
+                <div class="container-grid">
+                    {% for container in all_containers %}
+                        <div class="container-card">
+                            <strong>{{ container.name }}</strong>
+                            <p>Status: 
+                                {% if container.status == "running" %}
+                                    <span class="status-running">Running</span>
+                                {% else %}
+                                    <span class="status-exited">Exited</span>
+                                {% endif %}
+                            </p>
+
+                            <!-- Displaying Port Mappings -->
+                            <p>Ports:</p>
+                            <ul>
+                                {% set launch_url = '' %}
+                                {% if container.ports %}
+                                    {% for port, mappings in container.ports.items() %}
+                                        <li>
+                                            <strong>{{ port }}:</strong>
+                                            {% if mappings %}
+                                                <ul>
+                                                    {% for mapping in mappings %}
+                                                        <li>
+                                                            Host IP: {{ mapping.HostIp }} | Host Port: {{ mapping.HostPort }}
+                                                            
+                                                            <!-- Capture valid Host IP and Port for launch -->
+                                                            {% if launch_url == '' and mapping.HostIp != '::' %}
+                                                                {% set launch_url = 'http://' + mapping.HostIp + ':' + mapping.HostPort %}
+                                                            {% endif %}
+                                                        </li>
+                                                    {% endfor %}
+                                                </ul>
+                                            {% else %}
+                                                <span>No host mapping available</span>
+                                            {% endif %}
+                                        </li>
+                                    {% endfor %}
+                                {% else %}
+                                    <li>No ports are mapped.</li>
+                                {% endif %}
+                            </ul>
+
+                            <div class="container-actions">
+                                {% if container.status == "running" %}
+                                    <form action="/stop_container" method="post">
+                                        <input type="hidden" name="container_id" value="{{ container.id }}">
+                                        <button type="submit" class="stop-button">Stop</button>
+                                    </form>
+
+                                    {% if launch_url %}
+                                        <!-- Only show Launch in Browser button if launch_url is set -->
+                                        <form action="{{ launch_url }}" target="_blank">
+                                            <button type="submit" class="launch-button">Launch in Browser</button>
+                                        </form>
+                                    {% else %}
+                                        <p>No valid port mappings available for launch.</p>
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if container.status == "exited" %}
+                                    <form action="/restart_container" method="post">
+                                        <input type="hidden" name="container_id" value="{{ container.id }}">
+                                        <button type="submit" class="start-button">Start</button>
+                                    </form>
+                                {% endif %}
+
+                                <form action="/remove_container" method="post">
+                                    <input type="hidden" name="container_id" value="{{ container.id }}">
+                                    <button type="submit">Remove</button>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No containers available.</p>
+            {% endif %}
+        </div>
+    </div>
+
+        <div class="container-wrapper">
+        <div class="container-section">
+            <h2>Create a New Container</h2>
+            <div class="create-container-card">
+                <form action="/create_container" method="post">
+                    <label for="container_name">Container Name:</label>
+                    <input type="text" name="container_name" id="container_name" required placeholder="Enter a name for the container">
+
+                    <label for="container_type">Select Container Type:</label>
+                    <select name="container_type" id="container_type" required>
+                        <option value="vDAT">vDAT</option>
+                        <option value="vPM">vPM</option>
+                        <option value="vALM">vALM</option>
+                    </select>
+
+                    <label for="docker_image">Select Docker Image:</label>
+                    <select name="docker_image" id="docker_image" required>
+                        <!-- Dynamic list will be added based on the selected container type -->
+                    </select>
+
+                    <button type="submit">Create Container</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('container_type').addEventListener('change', function() {
+            const containerType = this.value;
+            const dockerImageSelect = document.getElementById('docker_image');
+
+            // Clear previous options
+            dockerImageSelect.innerHTML = '';
+
+            // Add the new options based on the container type
+            const images = {
+                vDAT: ['vDAT', 'vDAT scikit-learn'],
+                vPM: ['vPM Grafana', 'vPM'],
+                vALM: ['vALM InfluxDB', 'vALM']
+            };
+
+            images[containerType].forEach(image => {
+                const option = document.createElement('option');
+                option.value = image;
+                option.textContent = image;
+                dockerImageSelect.appendChild(option);
+            });
+        });
+
+        // Trigger change event to load default options
+        document.getElementById('container_type').dispatchEvent(new Event('change'));
+    </script>
+
+    <div class="container-wrapper">
+        <div class="container-section">
+            <h2>Start a New Container</h2>
+            <div class="container-card">
+                <form action="/start_container" method="post">
+                    <label for="image">Select Image:</label>
+                    <select name="image" id="image">
+                        {% if all_images %}
+                            {% for image in all_images %}
+                                <option value="{{ image.id }}">
+                                    {{ image.id }} - {{ image.tags[0] if image.tags else "Unnamed" }}
+                                </option>
+                            {% endfor %}
+                        {% else %}
+                            <option>No images available</option>
+                        {% endif %}
+                    </select>
+                    <button type="submit" class="start-button">Run</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="container-section">
+            <h2>Build a New Image</h2>
+            <div class="container-card">
+                <form action="/build_image" method="post">
+                    <label for="dockerfile">Dockerfile Path:</label>
+                    <input type="text" name="dockerfile" required>
+                    <label for="tag">Image Tag:</label>
+                    <input type="text" name="tag" required>
+                    <button type="submit" class="start-button">Build</button>
+                </form>
+            </div>
+        </div>
+
+        <script>
+            async function fetchMQTTMessages() {
+                try {
+                    const response = await fetch("/mqtt_messages");
+                    const messages = await response.json();
+                    const messagesList = document.getElementById("mqtt-messages");
+                    messagesList.innerHTML = ""; // Clear previous messages
+                    
+                    messages.forEach(message => {
+                        let listItem = document.createElement("li");
+                        listItem.textContent = message;
+                        messagesList.appendChild(listItem);
+                    });
+                } catch (error) {
+                    console.error("Error fetching MQTT messages:", error);
+                }
+            }
+
+            // Fetch messages every 0.5 seconds
+            setInterval(fetchMQTTMessages, 500);
+        </script>
+    </div>
+</body>
+</html>
+

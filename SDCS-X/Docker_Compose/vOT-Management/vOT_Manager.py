@@ -199,7 +199,8 @@ async def container_management(request: Request, machine_id: str):
 @app.get("/machines", response_class=HTMLResponse)
 async def home(request: Request):
     try:
-        all_containers = docker_ctrl.list_all_containers()
+        all_containers = docker_ctrl.list_ot_containers()
+        print("All containers: ", all_containers)
         all_images = docker_ctrl.list_all_images()
         running_containers = docker_ctrl.list_running_containers()
         stopped_containers = docker_ctrl.list_stopped_containers()
@@ -270,7 +271,7 @@ def open_browser():
 
 if __name__ == "__main__":
     
-    browser_thread = threading.Thread(target=open_browser)
-    browser_thread.start()
+    #browser_thread = threading.Thread(target=open_browser)
+    #browser_thread.start()
     
     uvicorn.run(app, host=host_ip, port=port_no)

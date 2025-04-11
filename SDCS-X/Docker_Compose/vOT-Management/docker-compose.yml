@@ -1,0 +1,20 @@
+services:
+  Robotic Depalletizer:
+    environment:
+      ENV_VAR: value
+    image: your_image_for_Robotic Depalletizer
+    ports:
+    - 8080:80
+  Robotic Packaging:
+    environment:
+      ENV_VAR: value
+    image: your_image_for_Robotic Packaging
+    ports:
+    - 8080:80
+  Vision Quality Inspection:
+    environment:
+      ENV_VAR: value
+    image: your_image_for_Vision Quality Inspection
+    ports:
+    - 8080:80
+version: '3.8'

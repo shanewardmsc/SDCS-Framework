@@ -1,0 +1,69 @@
+version: "3.8"
+services:
+  vit_manager:
+    build: ./vIT-Management  # Path to the directory containing the first Python script
+    container_name: vit_manager
+    ports:
+      - "9960:9960"
+    networks:
+      - IT_NETWORK
+    labels:
+      domain: "IT_DOMAIN"
+      
+  vot_manager:
+    build: ./vOT-Management  # Path to the directory containing the second Python script
+    container_name: vot_manager
+    ports:
+      - "9970:9970"
+    networks:
+      - OT_NETWORK
+    labels:
+      domain: "OT_DOMAIN"    
+      
+  vhis:
+    image: influxdb:latest
+    container_name: vhis
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=sensor_data
+    networks:
+      - OT_NETWORK
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+    labels:
+      domain: "OT_DOMAIN"
+
+  vhmi:
+    image: grafana/grafana:latest
+    container_name: vhmi
+    ports:
+      - "3000:3000"
+    depends_on:
+      - vhis
+    networks:
+      - OT_NETWORK
+    volumes:
+      - grafana_data:/var/lib/grafana
+    labels:
+      domain: "OT_DOMAIN"
+
+  vplc:
+    image: labshock-plc
+    container_name: vplc
+    ports:
+      - "502:502"
+      - "8080:8080"  # OpenPLC Web UI
+    networks:
+      - OT_NETWORK
+    labels:
+      domain: "OT_DOMAIN"
+
+networks:
+  IT_NETWORK:
+  OT_NETWORK:
+
+volumes:
+  influxdb_data:
+  grafana_data:
+
