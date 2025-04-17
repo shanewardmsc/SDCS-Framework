@@ -1,0 +1,107 @@
+version: "3.8"
+
+services:
+  mqtt_broker:
+    image: eclipse-mosquitto:2
+    container_name: mqtt_broker
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    networks:
+      - OT_NETWORK
+    labels:
+      domain: "OT_DOMAIN"
+      
+  vit_manager:
+    build: ./vIT-Management
+    container_name: vit_manager
+    ports:
+      - "9960:9960"
+    networks:
+      - IT_NETWORK
+    labels:
+      domain: "IT_DOMAIN"
+      
+  vot_manager:
+    build: ./vOT-Management
+    container_name: vot_manager
+    ports:
+      - "9970:9970"
+    depends_on:
+      - mqtt_broker
+    networks:
+      - OT_NETWORK
+    labels:
+      domain: "OT_DOMAIN"    
+      
+  vhis:
+    image: influxdb:latest
+    container_name: vhis
+    ports:
+      - "8086:8086"
+    environment:
+      - INFLUXDB_DB=sensor_data
+    depends_on:
+      - mqtt_broker 
+    networks:
+      - OT_NETWORK
+    volumes:
+      - influxdb_data:/var/lib/influxdb
+    labels:
+      domain: "OT_DOMAIN"
+
+  vhmi:
+    image: grafana/grafana:latest
+    container_name: vhmi
+    ports:
+      - "3000:3000"
+    depends_on:
+      - vhis
+      - mqtt_broker
+    networks:
+      - OT_NETWORK
+    volumes:
+      - grafana_data:/var/lib/grafana
+    labels:
+      domain: "OT_DOMAIN"
+
+  vplc:
+    image: docker.io/shanewardmsc/sdcs-x-openplc:v1.4
+    container_name: vplc
+    ports:
+      - "502:502"       # Modbus TCP
+      - "8080:8080"     # OpenPLC Web UI
+    depends_on:
+      - mqtt_broker
+    networks:
+      - OT_NETWORK
+    labels:
+      domain: "OT_DOMAIN"
+
+  modbus_mqtt:
+    build: ./modbus_mqtt
+    container_name: modbus_mqtt
+    depends_on:
+      - vplc
+      - mqtt_broker
+    networks:
+      - OT_NETWORK
+    volumes:
+      - ./modbus_mqtt:/app
+    environment:
+      - MQTT_BROKER=mqtt_broker  # or container name
+    labels:
+      domain: "OT_DOMAIN"
+
+networks:
+  IT_NETWORK:
+  OT_NETWORK:
+
+volumes:
+  influxdb_data:
+  grafana_data:
+

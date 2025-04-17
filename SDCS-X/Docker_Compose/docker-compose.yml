@@ -1,59 +1,81 @@
 version: "3.8"
+
 services:
-  vit_manager:
-    build: ./vIT-Management  # Path to the directory containing the first Python script
-    container_name: vit_manager
+  mqtt_broker:
+    image: eclipse-mosquitto:2
+    container_name: mqtt_broker
     ports:
-      - "9960:9960"
-    networks:
-      - IT_NETWORK
-    labels:
-      domain: "IT_DOMAIN"
-      
-  vot_manager:
-    build: ./vOT-Management  # Path to the directory containing the second Python script
-    container_name: vot_manager
-    ports:
-      - "9970:9970"
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
     networks:
       - OT_NETWORK
     labels:
-      domain: "OT_DOMAIN"    
+      domain: "OT_DOMAIN"  
+
+  vplc:
+    image: docker.io/shanewardmsc/sdcs-x-openplc:v1.4
+    container_name: vplc
+    ports:
+      - "502:502"       # Modbus TCP
+      - "8080:8080"     # OpenPLC Web UI
+    depends_on:
+      - mqtt_broker
+    networks:
+      - OT_NETWORK
+    labels:
+      domain: "OT_DOMAIN"
+
+  modbus_mqtt:
+    build: ./modbus_mqtt
+    container_name: modbus_mqtt
+    depends_on:
+      - vplc
+      - mqtt_broker
+    networks:
+      - OT_NETWORK
+    volumes:
+      - ./modbus_mqtt:/app
+    environment:
+      - MQTT_BROKER=mqtt_broker  # or container name
+    labels:
+      domain: "OT_DOMAIN"
       
   vhis:
-    image: influxdb:latest
+    image: docker.io/shanewardmsc/sdcs-x-influxdb:v1.3
     container_name: vhis
     ports:
       - "8086:8086"
-    environment:
-      - INFLUXDB_DB=sensor_data
-    networks:
-      - OT_NETWORK
-    volumes:
-      - influxdb_data:/var/lib/influxdb
-    labels:
-      domain: "OT_DOMAIN"
-
-  vhmi:
-    image: grafana/grafana:latest
-    container_name: vhmi
-    ports:
-      - "3000:3000"
     depends_on:
-      - vhis
+      - mqtt_broker 
     networks:
       - OT_NETWORK
+    environment:
+      INFLUXDB_INIT_MODE: setup
+      INFLUXDB_INIT_USERNAME: admin
+      INFLUXDB_INIT_PASSWORD: password
+      INFLUXDB_INIT_ORG: MTU
+      INFLUXDB_INIT_BUCKET: vHIS
+      INFLUXDB_INIT_RETENTION: 30d
     volumes:
-      - grafana_data:/var/lib/grafana
+      - influxdb_data:/var/lib/influxdb2
     labels:
       domain: "OT_DOMAIN"
-
-  vplc:
-    image: labshock-plc
-    container_name: vplc
-    ports:
-      - "502:502"
-      - "8080:8080"  # OpenPLC Web UI
+      
+  mqtt_to_influx:
+    build: ./mqtt_to_influx
+    environment:
+      - MQTT_BROKER=mqtt_broker
+      - INFLUX_URL=http://vhis:8086
+      - INFLUX_TOKEN=bHbyZnk5vjl_mrt7ekxBrKQis8hzzR9lEMQMM9I8pBK5VzD_Q-C1vyIs_FavSDWwjFAnjDdMeKX9yva-4r6QGw==
+      - INFLUX_ORG=MTU
+      - INFLUX_BUCKET=vHIS
+    depends_on:
+      - mqtt_broker
+      - vhis
     networks:
       - OT_NETWORK
     labels:

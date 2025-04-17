@@ -51,7 +51,7 @@ influx_client = InfluxDBClient(url=INFLUXDB_URL, token=INFLUXDB_TOKEN, org=INFLU
 write_api = influx_client.write_api()
 
 # MQTT Config
-BROKER = "test.mosquitto.org"
+BROKER = "mqtt_broker"
 PORT = 1883
 TOPIC_ALL = "+/+"  # Listen to all microservices
 TOPICS = {

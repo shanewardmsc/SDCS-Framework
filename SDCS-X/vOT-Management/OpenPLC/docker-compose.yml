@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  openplc:
+    build: .
+    container_name: openplc
+    ports:
+      - "8080:8080"
+      - "502:502"
+      - "20000:20000"
+    volumes:
+      - ./openplc/program:/home/openplc/OpenPLC_v3/webserver/st_files/
+    restart: unless-stopped
+

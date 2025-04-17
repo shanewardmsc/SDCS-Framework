@@ -1,0 +1,75 @@
+version: '3'
+
+services:
+  mqtt-broker:
+    image: eclipse-mosquitto:latest
+    container_name: mqtt-broker
+    ports:
+      - "1883:1883"
+    networks:
+      - sdcs-net
+    labels:
+      - "OT_Domain"
+
+  openplc:
+    build: ./openplc
+    container_name: openplc
+    ports:
+      - "8080:8080"   # OpenPLC Web UI
+      - "502:502"     # Modbus Port
+      - "20000:20000"
+    volumes:
+      - ./openplc/program:/home/openplc/program
+    networks:
+      - sdcs-net
+    labels:
+      - "OT_Domain"
+
+  influxdb:
+    image: influxdb:2.7
+    container_name: influxdb
+    ports:
+      - "8086:8086"
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=${INFLUX_USER}
+      - DOCKER_INFLUXDB_INIT_PASSWORD=${INFLUX_PASSWORD}
+      - DOCKER_INFLUXDB_INIT_ORG=${INFLUX_ORG}
+      - DOCKER_INFLUXDB_INIT_BUCKET=${INFLUX_BUCKET}
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=${INFLUX_TOKEN}
+    networks:
+      - sdcs-net
+    labels:
+      - "OT_Domain"
+      
+  grafana:
+    image: grafana/grafana
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - sdcs-net
+    labels:
+      - "OT_Domain"
+
+  openplc-mqtt-publisher:
+    build:
+      context: ./openplc-mqtt-publisher
+    container_name: mqtt-publisher
+    volumes:
+      - ./openplc/program:/app/tags
+    depends_on:
+      - openplc
+      - influxdb
+      - mqtt-broker
+    networks:
+      - sdcs-net
+    labels:
+      - "OT_Domain"
+
+networks:
+  sdcs-net:
+    driver: bridge
+
