@@ -17,7 +17,7 @@ services:
       domain: "OT_DOMAIN"  
 
   vplc:
-    image: docker.io/shanewardmsc/sdcs-x-openplc:v1.4
+    image: docker.io/shanewardmsc/sdcs-x-openplc:v1.7
     container_name: vplc
     ports:
       - "502:502"       # Modbus TCP
@@ -28,24 +28,11 @@ services:
       - OT_NETWORK
     labels:
       domain: "OT_DOMAIN"
-
-  modbus_mqtt:
-    build: ./modbus_mqtt
-    container_name: modbus_mqtt
-    depends_on:
-      - vplc
-      - mqtt_broker
-    networks:
-      - OT_NETWORK
-    volumes:
-      - ./modbus_mqtt:/app
-    environment:
-      - MQTT_BROKER=mqtt_broker  # or container name
-    labels:
-      domain: "OT_DOMAIN"
       
   vhis:
-    image: docker.io/shanewardmsc/sdcs-x-influxdb:v1.3
+    build:
+      context: ./vhis
+      dockerfile: Dockerfile
     container_name: vhis
     ports:
       - "8086:8086"
@@ -53,31 +40,48 @@ services:
       - mqtt_broker 
     networks:
       - OT_NETWORK
+    restart: always
     environment:
-      INFLUXDB_INIT_MODE: setup
-      INFLUXDB_INIT_USERNAME: admin
-      INFLUXDB_INIT_PASSWORD: password
-      INFLUXDB_INIT_ORG: MTU
-      INFLUXDB_INIT_BUCKET: vHIS
-      INFLUXDB_INIT_RETENTION: 30d
+      DOCKER_INFLUXDB_INIT_USERNAME: admin
+      DOCKER_INFLUXDB_INIT_PASSWORD: password
+      MQTT_BROKER: mqtt_broker
+      INFLUX_URL: http://localhost:8086
+      INFLUX_TOKEN: v0pWVk7e_RnmNMVce6JRRyIYiFmGLJNx5g2s3bgwELODB1O9n61URR6B_hBUkN1fhmvO6ks7zSGaprG9m0GKDA==
+      INFLUX_ORG: MTU
+      INFLUX_BUCKET: vHIS
+      TAGS_FILE: /app/plc_tags.csv
     volumes:
       - influxdb_data:/var/lib/influxdb2
     labels:
       domain: "OT_DOMAIN"
-      
-  mqtt_to_influx:
-    build: ./mqtt_to_influx
-    environment:
-      - MQTT_BROKER=mqtt_broker
-      - INFLUX_URL=http://vhis:8086
-      - INFLUX_TOKEN=bHbyZnk5vjl_mrt7ekxBrKQis8hzzR9lEMQMM9I8pBK5VzD_Q-C1vyIs_FavSDWwjFAnjDdMeKX9yva-4r6QGw==
-      - INFLUX_ORG=MTU
-      - INFLUX_BUCKET=vHIS
+
+  vot_manager:
+    build: ./vOT-Management
+    container_name: vot_manager
+    ports:
+      - "9970:9970"
     depends_on:
       - mqtt_broker
-      - vhis
     networks:
       - OT_NETWORK
+    labels:
+      domain: "OT_DOMAIN"
+      
+  vhmi:
+    image: docker.io/shanewardmsc/sdcs-x-grafana:v1.0
+    container_name: vhmi
+    ports:
+      - "3000:3000"
+    depends_on:
+      - vhis
+      - mqtt_broker
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=password
+    networks:
+      - OT_NETWORK
+    volumes:
+      - grafana_data:/var/lib/grafana
     labels:
       domain: "OT_DOMAIN"
 
