@@ -1,4 +1,4 @@
-FROM docker.io/shanewardmsc/sdcs-x-influxdb:v1.11
+FROM influxdb:latest
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3-venv && rm -rf /var/lib/apt/lists/*

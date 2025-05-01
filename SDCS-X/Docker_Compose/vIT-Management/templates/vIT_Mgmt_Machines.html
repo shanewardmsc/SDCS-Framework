@@ -25,7 +25,7 @@
         .header h1 {
             margin: 0;
             font-size: 36px;
-            text-align: left; /* Align the "IT Management Service" to the left */
+            text-align: left; /* Align the "OT Management Service" to the left */
         }
 
         .process-overview {
@@ -164,7 +164,7 @@
 <body>
     <div class="header">
         <h1>IT Management Service</h1>
-        <span class="process-overview">SERVICES</span>
+        <span class="process-overview">MACHINES</span>
     </div>
 
 
@@ -263,9 +263,11 @@
 
                     <label for="container_type">Select Container Type:</label>
                     <select name="container_type" id="container_type" required>
-                        <option value="vDAT">vDAT</option>
-                        <option value="vPM">vPM</option>
-                        <option value="vALM">vALM</option>
+                        <option value="vPLC">vPLC</option>
+                        <option value="vHMI">vHMI</option>
+                        <option value="vHIS">vHIS</option>
+                        <option value="vROB">vROB</option>
+                        <option value="vVIS">vVIS</option>
                     </select>
 
                     <label for="docker_image">Select Docker Image:</label>
@@ -289,9 +291,11 @@
 
             // Add the new options based on the container type
             const images = {
-                vDAT: ['vDAT', 'vDAT scikit-learn'],
-                vPM: ['vPM Grafana', 'vPM'],
-                vALM: ['vALM InfluxDB', 'vALM']
+                vPLC: ['vPLC OpenPLC', 'vPLC CodeSys'],
+                vHMI: ['vHMI Grafana', 'vHMI Ignition'],
+                vHIS: ['vHIS InfluxDB', 'vHIS Timebase'],
+                vROB: ['vROB CoppeliaSim', 'vROB ROS'],
+                vVIS: ['vVIS OpenCV', 'vVIS HALCON']
             };
 
             images[containerType].forEach(image => {

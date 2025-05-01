@@ -201,45 +201,89 @@
     <div class="process-stats-container">
         <div class="process-stat-card">
             <div class="process-stat-item">
-                <b>Shift Length</b><span>8 hours</span>
+                <b>Machine Running</b><span data-field="MachineRunning">-</span>
             </div>
             <div class="process-stat-item">
-                <b>Breaks</b><span>{{ breaks }}</span>
+                <b>Alarm Active</b><span data-field="AlarmActive">-</span>
             </div>
             <div class="process-stat-item">
-                <b>Downtime</b><span>{{ downtime }}</span>
+                <b>Downtime</b><span data-field="TotalDowntime_s">-</span>
             </div>
             <div class="process-stat-item">
-                <b>Ideal Cycle Time</b><span>{{ ideal_cycle_time }}</span>
+                <b>Product Variant</b><span data-field="ProductVariant">-</span>
             </div>
             <div class="process-stat-item">
-                <b>Total Count</b><span>{{ total_count }}</span>
+                <b>Good Parts Built</b><span data-field="GoodParts">-</span>
             </div>
             <div class="process-stat-item">
-                <b>Reject Count</b><span>{{ reject_count }}</span>
+                <b>Rejected Parts</b><span data-field="RejectedParts">-</span>
             </div>
             <div class="process-stat-item">
-                <b>Planned Production Time</b><span>{{ planned_production_time }}</span>
+                <b>Total Parts Processed</b><span data-field="TotalParts">-</span>
             </div>
         </div>
         <div class="process-stat-card">
             <div class="process-stat-item">
-                <b>Run Time</b><span>{{ run_time }}</span>
+                <b>Total Run Time</b><span data-field="TotalRuntime_s">-</span>
             </div>
             <div class="process-stat-item">
-                <b>Pass Count</b><span>{{ pass_count }}</span>
+                <b>Total Down Time</b><span data-field="TotalDowntime_s">-</span>
             </div>
             <div class="process-stat-item">
-                <b>Availability</b><span>{{ availability }}</span>
+                <b>Planned Production Time</b><span data-field="PlannedProductionTime_REAL">-</span>
             </div>
             <div class="process-stat-item">
-                <b>Performance</b><span>{{ performance }}</span>
+                <b>Availability</b><span data-field="Availability">-</span>
             </div>
             <div class="process-stat-item">
-                <b>Quality</b><span>{{ quality }}</span>
+                <b>Performance</b><span data-field="Performance">-</span>
             </div>
             <div class="process-stat-item">
-                <b>OEE</b><span>{{ oee }}</span>
+                <b>Quality</b><span data-field="Quality">-</span>
+            </div>
+            <div class="process-stat-item">
+                <b>OEE</b><span data-field="OEE">-</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="machine-title">SYSTEM STATUS</div>
+
+    <div class="process-stats-container">
+        <div class="process-stat-card">
+            <div class="process-stat-item">
+                <b>Docker Containers (Running)</b>
+                <span data-field="containers_running">{{ containers_running }}</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Docker Containers (Stopped)</b>
+                <span data-field="containers_stopped">{{ containers_stopped }}</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Total Containers</b>
+                <span data-field="containers_total">{{ containers_total }}</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Total Images</b>
+                <span data-field="docker_images">{{ docker_images }}</span>
+            </div>
+        </div>
+        <div class="process-stat-card">
+            <div class="process-stat-item">
+                <b>CPU Usage</b>
+                <span data-field="cpu_usage">{{ cpu_usage }}%</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Memory Usage</b>
+                <span data-field="memory_usage">{{ memory_usage }}%</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Disk Usage</b>
+                <span data-field="disk_usage">{{ disk_usage }}%</span>
+            </div>
+            <div class="process-stat-item">
+                <b>Network Latency</b>
+                <span data-field="container_latencies">{{ container_latencies }} ms</span>
             </div>
         </div>
     </div>
@@ -260,6 +304,66 @@
     </div>
     
     <script>
+    async function fetchProcessStats() {
+        try {
+            const response = await fetch("/process_statistics");
+            const data = await response.json();
+
+            document.querySelector("span[data-field='MachineRunning']").textContent = data.MachineRunning;
+            document.querySelector("span[data-field='AlarmActive']").textContent = data.AlarmActive;
+            document.querySelector("span[data-field='TotalDowntime_s']").textContent = data.TotalDowntime_s;
+            document.querySelector("span[data-field='ProductVariant']").textContent = data.ProductVariant;
+            document.querySelector("span[data-field='GoodParts']").textContent = data.GoodParts;
+            document.querySelector("span[data-field='RejectedParts']").textContent = data.RejectedParts;
+            document.querySelector("span[data-field='TotalParts']").textContent = data.TotalParts;
+            document.querySelector("span[data-field='TotalRuntime_s']").textContent = data.TotalRuntime_s;
+            document.querySelector("span[data-field='PlannedProductionTime_REAL']").textContent = data.PlannedProductionTime_REAL;
+            document.querySelector("span[data-field='Availability']").textContent = data.Availability;
+            document.querySelector("span[data-field='Performance']").textContent = data.Performance;
+            document.querySelector("span[data-field='Quality']").textContent = data.Quality;
+            document.querySelector("span[data-field='OEE']").textContent = data.OEE;
+        } catch (error) {
+            console.error("Error fetching process stats:", error);
+        }
+    }
+
+    // Fetch every 5 seconds
+    setInterval(fetchProcessStats, 2000);
+    fetchProcessStats();
+    </script>
+
+    
+    <script>
+    async function fetchSystemStatus() {
+        try {
+            const response = await fetch("/system_status");
+            const data = await response.json();
+
+            document.querySelector("span[data-field='containers_running']").textContent = data.containers_running;
+            document.querySelector("span[data-field='containers_stopped']").textContent = data.containers_stopped;
+            document.querySelector("span[data-field='containers_total']").textContent = data.containers_total;
+            document.querySelector("span[data-field='docker_images']").textContent = data.docker_images;
+            document.querySelector("span[data-field='cpu_usage']").textContent = data.cpu_usage + "%";
+            document.querySelector("span[data-field='memory_usage']").textContent = data.memory_usage + "%";
+            document.querySelector("span[data-field='disk_usage']").textContent = data.docker_disk_usage + "%";
+
+            // For container latencies, you can decide how to display (e.g., as a list)
+            let latencyText = "";
+            for (const [container, latency] of Object.entries(data.container_latencies)) {
+                latencyText += `${container}: ${latency !== null ? latency + " ms" : "unreachable"} | `;
+            }
+            document.querySelector("span[data-field='container_latencies']").textContent = latencyText;
+        } catch (error) {
+            console.error("Error fetching system status:", error);
+        }
+    }
+
+    // Fetch every 5 seconds
+    setInterval(fetchSystemStatus, 2000);
+    fetchSystemStatus();
+    </script>
+
+    <script>
       async function fetchMQTTMessages() {
         try {
           const response = await fetch("/mqtt_messages");
@@ -277,8 +381,8 @@
         }
       }
 
-      // Fetch messages every 0.5 seconds
-      setInterval(fetchMQTTMessages, 500);
+      // Fetch messages every 1 second
+      setInterval(fetchMQTTMessages, 1000);
     </script>
 </body>
 </html>

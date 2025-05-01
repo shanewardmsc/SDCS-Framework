@@ -1,6 +1,17 @@
 version: "3.8"
 
 services:
+  vit_manager:
+    build: ./vIT-Management
+    container_name: vit_manager
+    ports:
+      - "9960:9960"
+    networks:
+      - IT_NETWORK
+      - OT_NETWORK
+    labels:
+      domain: "IT_DOMAIN"
+  
   mqtt_broker:
     image: eclipse-mosquitto:2
     container_name: mqtt_broker
@@ -12,12 +23,13 @@ services:
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
     networks:
+      - IT_NETWORK
       - OT_NETWORK
     labels:
       domain: "OT_DOMAIN"  
 
   vplc:
-    image: docker.io/shanewardmsc/sdcs-x-openplc:v1.7
+    image: docker.io/shanewardmsc/sdcs-x-openplc:v1.10
     container_name: vplc
     ports:
       - "502:502"       # Modbus TCP
@@ -26,18 +38,18 @@ services:
       - mqtt_broker
     networks:
       - OT_NETWORK
+    environment:
+      TAGS_FILE: /app/plc_tags.csv
     labels:
       domain: "OT_DOMAIN"
       
   vhis:
-    build:
-      context: ./vhis
-      dockerfile: Dockerfile
+    image: shanewardmsc/sdcs-x-influxdb:v1.17
     container_name: vhis
     ports:
       - "8086:8086"
     depends_on:
-      - mqtt_broker 
+      - mqtt_broker
     networks:
       - OT_NETWORK
     restart: always
@@ -55,18 +67,26 @@ services:
     labels:
       domain: "OT_DOMAIN"
 
+
   vot_manager:
     build: ./vOT-Management
     container_name: vot_manager
+    privileged: true
     ports:
       - "9970:9970"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
     depends_on:
       - mqtt_broker
     networks:
+      - IT_NETWORK
       - OT_NETWORK
     labels:
       domain: "OT_DOMAIN"
-      
+
+
   vhmi:
     image: docker.io/shanewardmsc/sdcs-x-grafana:v1.0
     container_name: vhmi

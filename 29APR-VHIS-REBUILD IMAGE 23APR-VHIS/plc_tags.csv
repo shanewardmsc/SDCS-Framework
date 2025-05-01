@@ -1,0 +1,15 @@
+tag_name,modbus_address,data_type,modbus_function
+TotalDowntime_s,0,INT,holding_register
+TotalParts,1,INT,holding_register
+RejectedParts,2,INT,holding_register
+TotalRuntime_s,3,INT,holding_register
+GoodParts,4,INT,holding_register
+ProductVariant,5,INT,holding_register
+IdealCycleTime_s,2048,REAL,holding_register
+PlannedProductionTime_REAL,2050,REAL,holding_register
+Availability,2052,REAL,holding_register
+Performance,2054,REAL,holding_register
+Quality,2056,REAL,holding_register
+OEE,2058,REAL,holding_register
+MachineRunning,0,BOOL,coil
+AlarmActive,1,BOOL,coil

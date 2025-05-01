@@ -10,7 +10,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 MQTT_BROKER = os.getenv("MQTT_BROKER", "mqtt_broker")
 MQTT_PORT = 1883
 INFLUX_URL = os.getenv("INFLUX_URL", "http://0.0.0.0:8086")
-INFLUX_TOKEN = os.getenv("INFLUX_TOKEN", "v0pWVk7e_RnmNMVce6JRRyIYiFmGLJNx5g2s3bgwELODB1O9n61URR6B_hBUkN1fhmvO6ks7zSGaprG9m0GKDA==")
+INFLUX_TOKEN = os.getenv("INFLUX_TOKEN")
 INFLUX_ORG = os.getenv("INFLUX_ORG", "MTU")
 INFLUX_BUCKET = os.getenv("INFLUX_BUCKET", "vHIS")
 TAGS_FILE = os.getenv("TAGS_FILE", "/app/plc_tags.csv")

@@ -17,7 +17,7 @@ MQTT_BASE_TOPIC = f"vPLC/{PLC_ID}/"
 READ_INTERVAL = 1  # seconds
 
 # --- Wait Functions ---
-def wait_for_service(name, host, port, timeout=30):
+def wait_for_service(name, host, port, timeout=60):
     print(f"[INIT] Waiting for {name} at {host}:{port} (timeout: {timeout}s)...")
     start = time.time()
     while True:
@@ -37,7 +37,7 @@ wait_for_service("PLC", PLC_HOST, PLC_PORT)
 
 # --- MQTT Setup ---
 print("[MQTT] Initializing MQTT client...")
-mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id="main_service")
+mqtt_client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id="vPLC")
 
 print(f"[MQTT] Connecting to broker at {MQTT_BROKER}:{MQTT_PORT}...")
 mqtt_client.connect(MQTT_BROKER, MQTT_PORT, 60)
@@ -128,8 +128,9 @@ try:
 
                             # Attempt unpacking in both byte orders for diagnostic
                             try:
-                                value_be = struct.unpack('>f', byte_data)[0]
-                                print(f"[SUCCESS] {tag_name} (REAL) value (Big-Endian): {value_be}")
+                                value = struct.unpack('>f', byte_data)[0]
+                                value = f"{value:.5f}"
+                                print(f"[SUCCESS] {tag_name} (REAL) value (Big-Endian): {value}")
                             except Exception as e:
                                 print(f"[ERROR] Big-Endian unpacking failed for {tag_name}: {e}")
 

@@ -10,24 +10,24 @@ class DockerInterface:
     def __init__(self):
         pass
 
+
     def docker_connect(self):
-        # Create and return a Resource
         try:
-            client = docker.from_env()
-            if client is not None:
-                return client
-            else:
-                print("Error: docker_utils() client connection failed")
-                return
+            # Explicitly use the Unix socket
+            client = docker.DockerClient(base_url='unix:///var/run/docker.sock')
 
+            if client is None:
+                print("Error: Docker client connection returned None")
+                return None
+
+            print("Docker client successfully connected.")
             return client
-
-        except docker.errors.APIError as error:
-            print("Error: docker_utils() ", str(error))
-            return
+        except docker.errors.DockerException as error:
+            print(f"Error: Failed to connect to Docker. {str(error)}")
+            return None
         except Exception as error:
-            print("Error: docker_utils() General exception occurred: ", str(error))
-            return
+            print(f"Unexpected error: {str(error)}")
+            return None
 
 
 # -------------------------------------------------------#
