@@ -2,7 +2,7 @@ version: "3.8"
 
 services:
   vit_manager:
-    image: shanewardmsc/sdcs-x-vit_manager:v1.0
+    build: ./vIT-Management
     container_name: vit_manager
     ports:
       - "9960:9960"
@@ -69,7 +69,7 @@ services:
 
 
   vot_manager:
-    image: shanewardmsc/sdcs-x-vot_manager:v1.0
+    build: ./vOT-Management
     container_name: vot_manager
     privileged: true
     ports:
